@@ -27,11 +27,11 @@ export class StatusBarController {
   }
 
   update(summary: UsageSummary, quota: QuotaData | null): void {
-    // No usage recorded yet — user hasn't made a Claude request
-    if (summary.allTimeTokens === 0) {
+    // No calls made today — show spinner until first request this session
+    if (summary.todayTokens === 0) {
       this.item.color   = C_PURPLE;
       this.item.text    = '$(sync~spin) Waiting for Claude...';
-      this.item.tooltip = 'No Claude Code usage detected yet';
+      this.item.tooltip = 'No Claude Code usage today yet';
       return;
     }
 
