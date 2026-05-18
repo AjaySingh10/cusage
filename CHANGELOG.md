@@ -6,6 +6,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 
 ---
 
+## [4.0.0] - 2026-05-17
+
+### Changed
+- **Dashboard fully revamped** — replaced the single-scroll page with a tabbed SPA (Overview / Projects / Sessions / Models):
+  - **Overview** — hero cards with split integer/decimal cost display; Today's Token Breakdown section (Input, Output, Cache Read, Cache Write); Usage Windows & Quota cards with window labels; compact By Model cards with SVG donut ring charts; All-Time Token Breakdown
+  - **Projects tab** — searchable, client-side sortable table (Cost / Tokens / Sessions / Name) with per-project colour-coded dots and share-of-spend bars
+  - **Sessions tab** — filterable by model pill and text search; colour-coded project dots consistent with the Projects tab
+  - **Models tab** — three summary cards (Total Spend, Total Tokens, Requests) plus full-width detail cards with donut rings
+- **Color system aligned with claude-deck** — dashboard now uses VS Code theme variables (`--vscode-editor-background`, `--vscode-editor-foreground`, etc.) so it adapts to light/dark themes; accent updated to `#d97757`
+- **TODAY hero card highlighted** — distinct border and tinted background using `--accent-line` / `--accent-bg`; all other hero card values are white
+- **Today's Token Breakdown added** — new section in the Overview tab showing today's per-type token counts alongside the existing all-time breakdown
+- **Sparkline charts removed** — hero cards show clean cost values without decorative line graphs
+- **Startup loading indicator** — status bar shows an animated `$(sync~spin) Claude...` spinner on launch instead of stale cached values; live data replaces it once the first scan completes
+
+### Added
+- **`todayTokenBreakdown`** — per-type token counts scoped to today, surfaced in the new Today's Tokens section
+- **`last7DayCosts`** — rolling 7-day daily cost array (used internally for future sparkline support)
+- **`prevWeekCost` / `prevMonthCost`** — previous-period costs for week-over-week and month-over-month comparisons
+
+---
+
 ## [3.0.0] - 2026-05-15
 
 ### Fixed

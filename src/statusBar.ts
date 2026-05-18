@@ -21,12 +21,20 @@ export class StatusBarController {
     this.item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     this.item.command = 'clusage.openPanel';
     this.item.color   = C_PURPLE;
-    this.item.text    = '$(graph) Claude...';
-    this.item.tooltip = 'Claude Usage - click to open dashboard';
+    this.item.text    = '$(sync~spin) Claude...';
+    this.item.tooltip = 'Claude Usage - loading…';
     this.item.show();
   }
 
   update(summary: UsageSummary, quota: QuotaData | null): void {
+    // No usage recorded yet — user hasn't made a Claude request
+    if (summary.allTimeTokens === 0) {
+      this.item.color   = C_PURPLE;
+      this.item.text    = '$(sync~spin) Waiting for Claude...';
+      this.item.tooltip = 'No Claude Code usage detected yet';
+      return;
+    }
+
     const cost = formatCost(summary.todayCost);
 
     const fmtPct = (v: number) =>
@@ -42,7 +50,8 @@ export class StatusBarController {
       const reset = timeUntil(quota.fiveHourResetAt);
       this.item.text = `$(graph) ${cost}  5h:${fmtPct(quota.fiveHourUtilization)} $(clock)${reset}  7d:${fmtPct(quota.sevenDayUtilization)}`;
     } else {
-      this.item.text = `$(graph) ${cost}`;
+      this.item.color = C_PURPLE;
+      this.item.text  = '$(sync~spin) Waiting for Claude...';
     }
 
     this.item.tooltip = buildTooltip(summary, quota);

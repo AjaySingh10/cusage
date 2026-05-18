@@ -86,6 +86,9 @@ export function activate(context: vscode.ExtensionContext): void {
   const cachedSummary = context.globalState.get<UsageSummary>('lastSummary');
   const cachedQuotaRaw = context.globalState.get<any>('lastQuota');
 
+  // Restore cached data into memory so the dashboard can open immediately,
+  // but do NOT push it to the status bar — the spinner stays until the first
+  // real scan completes (avoids showing stale zeros on startup).
   if (cachedSummary) {
     lastSummary = cachedSummary;
   }
@@ -97,15 +100,12 @@ export function activate(context: vscode.ExtensionContext): void {
       ...cachedQuotaRaw,
       fiveHourResetAt,
       sevenDayResetAt,
-      // If the reset time has already passed, zero out that window
       fiveHourUtilization: fiveHourResetAt.getTime() <= now ? 0 : cachedQuotaRaw.fiveHourUtilization,
       sevenDayUtilization: sevenDayResetAt.getTime() <= now ? 0 : cachedQuotaRaw.sevenDayUtilization,
       sevenDayHeaderPresent: cachedQuotaRaw.sevenDayHeaderPresent ?? true,
     };
   }
-  if (lastSummary) {
-    statusBar.update(lastSummary, lastQuota);
-  }
+  // Status bar stays on the spinner until refreshUsage() finishes below.
 
   // Open dashboard command
   const openCmd = vscode.commands.registerCommand('clusage.openPanel', () => {

@@ -2,7 +2,7 @@
   "name": "clusage",
   "displayName": "Clusage - Claude Usage Tracker",
   "description": "Real-time Claude Code usage tracking - cost, tokens, and live quota in your status bar and a beautiful dashboard.",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "publisher": "Ajax1029",
   "author": {
     "name": "Ajax1029"
