@@ -50,8 +50,11 @@ export class StatusBarController {
       const reset = timeUntil(quota.fiveHourResetAt);
       this.item.text = `$(graph) ${cost}  5h:${fmtPct(quota.fiveHourUtilization)} $(clock)${reset}  7d:${fmtPct(quota.sevenDayUtilization)}`;
     } else {
+      // Quota fetch failed (no creds, offline, transient API error) but we
+      // still have real usage data — show cost-only instead of stalling on
+      // the spinner forever.
       this.item.color = C_PURPLE;
-      this.item.text  = '$(sync~spin) Waiting for Claude...';
+      this.item.text  = `$(graph) ${cost}`;
     }
 
     this.item.tooltip = buildTooltip(summary, quota);

@@ -141,6 +141,28 @@ async function readJsonlFile(filePath: string, projectPath: string): Promise<Usa
   return records;
 }
 
+// Recursively collect every *.jsonl under a project directory. Claude Code
+// nests subagent transcripts under <sessionId>/subagents/, so a flat readdir
+// would miss them.
+function collectJsonlFiles(dir: string): string[] {
+  const out: string[] = [];
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...collectJsonlFiles(full));
+    } else if (entry.isFile() && entry.name.endsWith('.jsonl')) {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
 export async function scanAllProjects(): Promise<UsageRecord[]> {
   const claudeDir = path.join(os.homedir(), '.claude', 'projects');
 
@@ -159,15 +181,7 @@ export async function scanAllProjects(): Promise<UsageRecord[]> {
     const projectPath = '/' + projectDir.replace(/^-/, '').replace(/-/g, '/');
     const dirPath = path.join(claudeDir, projectDir);
 
-    let files: string[];
-    try {
-      files = fs.readdirSync(dirPath).filter(f => f.endsWith('.jsonl'));
-    } catch {
-      continue;
-    }
-
-    for (const file of files) {
-      const filePath = path.join(dirPath, file);
+    for (const filePath of collectJsonlFiles(dirPath)) {
       try {
         const records = await readJsonlFile(filePath, projectPath);
         allRecords.push(...records);
