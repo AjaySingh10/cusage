@@ -2,16 +2,15 @@ import * as vscode from 'vscode';
 import { UsageSummary, formatCost, formatTokenCount } from './aggregator';
 import { QuotaData } from './quota';
 
-const C_PURPLE = '#7c6af7';
 const C_AMBER  = '#fbbf24';
 const C_RED    = '#f87171';
 
-function urgencyColor(quota: QuotaData | null): string {
-  if (!quota) return C_PURPLE;
+function urgencyColor(quota: QuotaData | null): string | undefined {
+  if (!quota) return undefined;
   const max = Math.max(quota.fiveHourUtilization, quota.sevenDayUtilization);
   if (max >= 0.9) return C_RED;
   if (max >= 0.7) return C_AMBER;
-  return C_PURPLE;
+  return undefined;
 }
 
 export class StatusBarController {
@@ -20,7 +19,6 @@ export class StatusBarController {
   constructor() {
     this.item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     this.item.command = 'clusage.openPanel';
-    this.item.color   = C_PURPLE;
     this.item.text    = '$(sync~spin) Claude...';
     this.item.tooltip = 'Claude Usage - loading…';
     this.item.show();
@@ -29,7 +27,7 @@ export class StatusBarController {
   update(summary: UsageSummary, quota: QuotaData | null): void {
     // No calls made today — show spinner until first request this session
     if (summary.todayTokens === 0) {
-      this.item.color   = C_PURPLE;
+      this.item.color   = undefined;
       this.item.text    = '$(sync~spin) Waiting for Claude...';
       this.item.tooltip = 'No Claude Code usage today yet';
       return;
@@ -53,7 +51,7 @@ export class StatusBarController {
       // Quota fetch failed (no creds, offline, transient API error) but we
       // still have real usage data — show cost-only instead of stalling on
       // the spinner forever.
-      this.item.color = C_PURPLE;
+      this.item.color = undefined;
       this.item.text  = `$(graph) ${cost}`;
     }
 
