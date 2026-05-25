@@ -58,9 +58,13 @@ export async function fetchQuota(): Promise<QuotaData | null> {
         path: '/v1/messages',
         method: 'POST',
         headers: {
+          // OAuth tokens go through `authorization: Bearer`. Sending the same
+          // token in `x-api-key` causes the API to reject with 401
+          // "invalid x-api-key" — it validates that header as an API key, not
+          // an OAuth token, so the combo must not be sent together.
           'authorization': `Bearer ${token}`,
-          'x-api-key': token,
           'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'oauth-2025-04-20',
           'anthropic-client-platform': 'claude_cli',
           'content-type': 'application/json',
           'content-length': Buffer.byteLength(body),
@@ -81,6 +85,16 @@ export async function fetchQuota(): Promise<QuotaData | null> {
         const sevenDayResetAt = parse7dReset
           ? new Date(parseInt(parse7dReset, 10) * 1000)
           : new Date(Date.now() + 7 * 86400_000);
+
+        // Any non-2xx without rate-limit headers is an auth / server failure,
+        // not a usable quota signal. Returning zeros here would mislead users
+        // into thinking they had full quota remaining. The single exception is
+        // 429-with-no-headers, which legitimately means "quota exhausted".
+        if (!headersPresent && res.statusCode !== 429 &&
+            (res.statusCode === undefined || res.statusCode < 200 || res.statusCode >= 300)) {
+          resolve(null);
+          return;
+        }
 
         // 429 with no headers = quota exhausted / hard rate-limited
         if (res.statusCode === 429 && !headersPresent) {

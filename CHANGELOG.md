@@ -6,6 +6,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 
 ---
 
+## [5.0.0] - 2026-05-25
+
+### Fixed
+- **Status bar showed `5h:0% 7d:0%` despite real quota usage** — recent Claude Code releases use OAuth tokens (`sk-ant-oat…`) that the Anthropic API now strictly validates per header. Sending the same token in both `authorization: Bearer …` and `x-api-key: …` causes the API to reject the request with `401 invalid x-api-key`. The rate-limit headers are absent on that response, so `fetchQuota` was falling through and returning `utilization=0` for both windows. The duplicate `x-api-key` header has been removed and the OAuth beta header (`anthropic-beta: oauth-2025-04-20`) is now sent, matching the current Claude Code request shape. Real `anthropic-ratelimit-unified-5h-utilization` / `7d-utilization` values are now read correctly.
+- **Silent fallback to 0% on auth/server failure** — any non-2xx response without rate-limit headers now returns `null` from `fetchQuota` instead of a fake `{ utilization: 0, … }` payload. The status bar now shows cost-only on quota failure (e.g. expired OAuth token, offline, API outage) rather than misleadingly reporting full quota remaining.
+
+### Changed
+- **Recursive JSONL scanning** — `parser.ts` now walks subdirectories under each project folder so subagent transcripts under `<sessionId>/subagents/` are included in usage totals.
+
+---
+
 ## [4.0.0] - 2026-05-17
 
 ### Changed
