@@ -20,6 +20,10 @@ export interface UsageRecord {
 // Per-million-token prices: [input, output, cacheWrite5m, cacheWrite1h, cacheRead]
 // More-specific prefixes MUST come before broader ones (startsWith matching).
 const PRICING_TABLE: Array<[string, number, number, number, number, number]> = [
+  // Fable 5 - $10 / $50
+  ['claude-fable-5',    10,    50,  12.50,  20,   1.00],
+  // Opus 4.8 - $5 / $25 (must precede 'claude-opus-4')
+  ['claude-opus-4-8',    5,    25,   6.25,  10,   0.50],
   // Opus 4.5 / 4.6 / 4.7 - repriced at $5 / $25 (must precede 'claude-opus-4')
   ['claude-opus-4-5',    5,    25,   6.25,  10,   0.50],
   ['claude-opus-4-6',    5,    25,   6.25,  10,   0.50],

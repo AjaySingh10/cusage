@@ -8,7 +8,7 @@
 
 Track every dollar, token, and quota percentage across all your Claude Code sessions without leaving your editor.
 
-[![Version](https://img.shields.io/badge/version-5.0.0-7c6af7?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=Ajax1029.clusage)
+[![Version](https://img.shields.io/badge/version-5.0.1-7c6af7?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=Ajax1029.clusage)
 [![VS Code](https://img.shields.io/badge/VS%20Code-1.85+-5eead4?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=Ajax1029.clusage)
 [![License](https://img.shields.io/badge/license-MIT-4ade80?style=flat-square)](LICENSE)
 
@@ -194,6 +194,8 @@ Costs are computed locally using these published rates:
 
 | Model | Input | Output | Cache Write (5m) | Cache Read |
 |---|---|---|---|---|
+| Claude Fable 5 | $10.00 / MTok | $50.00 / MTok | $12.50 / MTok | $1.00 / MTok |
+| Claude Opus 4.8 | $5.00 / MTok | $25.00 / MTok | $6.25 / MTok | $0.50 / MTok |
 | Claude Opus 4.5 / 4.6 / 4.7 | $5.00 / MTok | $25.00 / MTok | $6.25 / MTok | $0.50 / MTok |
 | Claude Opus 4 / 4.1 (deprecated) | $15.00 / MTok | $75.00 / MTok | $18.75 / MTok | $1.50 / MTok |
 | Claude Sonnet 4 / 4.5 / 4.6 | $3.00 / MTok | $15.00 / MTok | $3.75 / MTok | $0.30 / MTok |

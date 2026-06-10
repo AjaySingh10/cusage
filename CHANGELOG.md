@@ -6,6 +6,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 
 ---
 
+## [5.0.1] - 2026-06-10
+
+### Added
+- **Pricing for Claude Fable 5** — $10.00 / $50.00 input/output per MTok; cache write $12.50 (5m) / $20.00 (1h); cache read $1.00
+- **Pricing for Claude Opus 4.8** — $5.00 / $25.00 input/output per MTok; cache write $6.25 (5m) / $10.00 (1h); cache read $0.50
+
+---
+
 ## [5.0.0] - 2026-05-25
 
 ### Fixed
