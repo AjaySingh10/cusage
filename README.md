@@ -153,6 +153,17 @@ The dashboard and status bar stay in sync automatically. No polling loops, no ma
 
 ---
 
+## 🔧 Settings
+
+Configurable via **Settings → Extensions → Clusage**
+
+| Setting | Default | Description |
+|---|---|---|
+| `clusage.showCostInStatusBar` | `true` | Show the cost (in USD) in the status bar. Turn this off if you're on a fixed-price Claude plan and only care about quota usage. |
+| `clusage.disableRefreshAnimation` | `false` | Disable the dashboard's fade-in animations so background refreshes only update the numbers instead of redrawing the display. |
+
+---
+
 ## 📦 Requirements
 
 | Requirement | Details |
