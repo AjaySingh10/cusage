@@ -18,35 +18,29 @@ export interface UsageRecord {
 }
 
 // Per-million-token prices: [input, output, cacheWrite5m, cacheWrite1h, cacheRead]
-// More-specific prefixes MUST come before broader ones (startsWith matching).
+// Only the four currently-accessible models are listed here — everything else
+// (Opus 4.x, Sonnet 4.x, Haiku 3.x, Claude 3.x, ...) has been retired.
 const PRICING_TABLE: Array<[string, number, number, number, number, number]> = [
   // Fable 5 - $10 / $50
   ['claude-fable-5',    10,    50,  12.50,  20,   1.00],
-  // Opus 4.8 - $5 / $25 (must precede 'claude-opus-4')
-  ['claude-opus-4-8',    5,    25,   6.25,  10,   0.50],
-  // Opus 4.5 / 4.6 / 4.7 - repriced at $5 / $25 (must precede 'claude-opus-4')
-  ['claude-opus-4-5',    5,    25,   6.25,  10,   0.50],
-  ['claude-opus-4-6',    5,    25,   6.25,  10,   0.50],
-  ['claude-opus-4-7',    5,    25,   6.25,  10,   0.50],
-  // Opus 4 (deprecated) and 4.1 - original $15 / $75 tier
-  ['claude-opus-4',     15,    75,  18.75,  30,   1.50],
-  // Sonnet 4.x - $3 / $15
-  ['claude-sonnet-4',    3,    15,   3.75,   6,   0.30],
-  // Haiku 4.5 - repriced at $1 / $5 (must precede 'claude-haiku-4')
+  // Opus 5 - $5 / $25
+  ['claude-opus-5',      5,    25,   6.25,  10,   0.50],
+  // Haiku 4.5 - $1 / $5
   ['claude-haiku-4-5',   1,     5,   1.25,   2,   0.10],
-  // Generic Haiku 4.x fallback
-  ['claude-haiku-4',     1,     5,   1.25,   2,   0.10],
-  // Claude 3.x legacy - new-style IDs first (claude-haiku-3-5-*)
-  ['claude-haiku-3-5',   0.8,   4,   1.00,  1.60, 0.08],
-  ['claude-3-opus',     15,    75,  18.75,  30,   1.50],
-  ['claude-3-5-sonnet',  3,    15,   3.75,   6,   0.30],
-  ['claude-3-5-haiku',   0.8,   4,   1.00,  1.60, 0.08],
-  ['claude-3-sonnet',    3,    15,   3.75,   6,   0.30],
-  ['claude-3-haiku',    0.25, 1.25, 0.3125, 0.50, 0.025],
 ];
 const DEFAULT_PRICING: [number, number, number, number, number] = [3, 15, 3.75, 6, 0.30];
 
-function getPricing(model: string): [number, number, number, number, number] {
+// Sonnet 5 introductory pricing runs through 2026-08-31; list pricing applies from
+// 2026-09-01 onward. Priced by each record's own timestamp, not "now", so historical
+// usage keeps whichever rate was actually in effect when the request was made.
+const SONNET_5_INTRO_CUTOFF = new Date('2026-09-01T00:00:00Z').getTime();
+const SONNET_5_INTRO_PRICING: [number, number, number, number, number] = [2, 10, 2.50, 4, 0.20];
+const SONNET_5_LIST_PRICING: [number, number, number, number, number] = [3, 15, 3.75, 6, 0.30];
+
+function getPricing(model: string, timestampMs: number): [number, number, number, number, number] {
+  if (model.startsWith('claude-sonnet-5')) {
+    return timestampMs < SONNET_5_INTRO_CUTOFF ? SONNET_5_INTRO_PRICING : SONNET_5_LIST_PRICING;
+  }
   for (const [prefix, input, output, cacheWrite5m, cacheWrite1h, cacheRead] of PRICING_TABLE) {
     if (model.startsWith(prefix)) {
       return [input, output, cacheWrite5m, cacheWrite1h, cacheRead];
@@ -57,13 +51,14 @@ function getPricing(model: string): [number, number, number, number, number] {
 
 function computeCost(
   model: string,
+  timestampMs: number,
   inputTokens: number,
   outputTokens: number,
   cacheWrite5mTokens: number,
   cacheWrite1hTokens: number,
   cacheReadTokens: number
 ): number {
-  const [inputPrice, outputPrice, cacheWrite5mPrice, cacheWrite1hPrice, cacheReadPrice] = getPricing(model);
+  const [inputPrice, outputPrice, cacheWrite5mPrice, cacheWrite1hPrice, cacheReadPrice] = getPricing(model, timestampMs);
   const M = 1_000_000;
   return (
     (inputTokens        * inputPrice)       / M +
@@ -121,11 +116,12 @@ async function readJsonlFile(filePath: string, projectPath: string): Promise<Usa
 
       const projectDir = obj.cwd ?? projectPath;
       const model: string = msg.model ?? 'unknown';
+      const timestamp = new Date(obj.timestamp ?? Date.now());
 
-      const costUSD = computeCost(model, inputTokens, outputTokens, cacheWrite5mTokens, cacheWrite1hTokens, cacheReadTokens);
+      const costUSD = computeCost(model, timestamp.getTime(), inputTokens, outputTokens, cacheWrite5mTokens, cacheWrite1hTokens, cacheReadTokens);
 
       records.push({
-        timestamp: new Date(obj.timestamp ?? Date.now()),
+        timestamp,
         sessionId: obj.sessionId ?? '',
         projectPath: projectDir,
         model,

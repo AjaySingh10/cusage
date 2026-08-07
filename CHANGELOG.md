@@ -6,6 +6,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 
 ---
 
+## [5.1.0] - 2026-08-07
+
+### Fixed
+- **Dashboard reset to the Overview tab on every background refresh** (#6) — `refreshDashboard` reassigned the webview's `.html`, which fully reloads the page and discards all client-side state. Reopening the dashboard from the status bar while it was already open did the same thing. The dashboard now keeps a single long-lived page and pushes fresh data to it via `postMessage`; the active tab, project/session search text, sort order, and model filter all survive refreshes and reopens.
+
+### Added
+- **`clusage.showCostInStatusBar` setting** (#4) — disables the cost figure in the status bar text and tooltip for users on a fixed-price plan who only care about quota usage.
+- **`clusage.disableRefreshAnimation` setting** (#5) — disables the dashboard's fade-in animations so refreshes update the numbers in place without redrawing the UI. Applies immediately when toggled, no reload required.
+- **Pricing for Claude Opus 5** — $5.00 / $25.00 input/output per MTok; cache write $6.25 (5m) / $10.00 (1h); cache read $0.50
+- **Pricing for Claude Sonnet 5** — introductory rate through 2026-08-31: $2.00 / $10.00 input/output per MTok; cache write $2.50 (5m) / $4.00 (1h); cache read $0.20. Reverts automatically to list pricing ($3.00 / $15.00; cache write $3.75 / $6.00; cache read $0.30) for any request timestamped 2026-09-01 or later — each usage record is priced by its own timestamp, not by today's date, so past and future usage are both priced correctly regardless of when the dashboard is opened.
+
+### Removed
+- **Pricing table trimmed to the four currently-accessible models** — Claude Fable 5, Opus 5, Sonnet 5, and Haiku 4.5. Opus 4.5/4.6/4.7/4.8/4, Sonnet 4.x, Haiku 3.x, and the Claude 3.x line have been retired and are no longer served, so their pricing entries were removed; any unrecognized model ID falls back to the Sonnet-5-equivalent default rate ($3 / $15 per MTok) instead of a per-model entry.
+
+---
+
 ## [5.0.1] - 2026-06-10
 
 ### Added

@@ -12,13 +12,17 @@ let lastSummary: UsageSummary | undefined;
 let lastQuota: QuotaData | null = null;
 let extContext: vscode.ExtensionContext | undefined;
 
+function noAnimEnabled(): boolean {
+  return vscode.workspace.getConfiguration('clusage').get<boolean>('disableRefreshAnimation', false);
+}
+
 async function refreshUsage(): Promise<void> {
   try {
     const records = await scanAllProjects();
     lastSummary = aggregate(records);
     extContext?.globalState.update('lastSummary', lastSummary);
     statusBar?.update(lastSummary, lastQuota);
-    refreshDashboard(lastSummary, lastQuota);
+    refreshDashboard(lastSummary, lastQuota, noAnimEnabled());
   } catch (err) {
     console.error('[clusage] usage refresh error:', err);
   }
@@ -51,7 +55,7 @@ async function refreshQuota(): Promise<void> {
     }
     if (lastSummary) {
       statusBar?.update(lastSummary, lastQuota);
-      refreshDashboard(lastSummary, lastQuota);
+      refreshDashboard(lastSummary, lastQuota, noAnimEnabled());
     }
 
     // Schedule an automatic re-fetch right after whichever reset is soonest,
@@ -110,18 +114,26 @@ export function activate(context: vscode.ExtensionContext): void {
   // Open dashboard command
   const openCmd = vscode.commands.registerCommand('clusage.openPanel', () => {
     if (lastSummary) {
-      showDashboard(context, lastSummary, lastQuota);
+      showDashboard(context, lastSummary, lastQuota, noAnimEnabled());
     } else {
       vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: 'Loading Claude usage data…' },
         async () => {
           await Promise.all([refreshUsage(), refreshQuota()]);
-          if (lastSummary) showDashboard(context, lastSummary, lastQuota);
+          if (lastSummary) showDashboard(context, lastSummary, lastQuota, noAnimEnabled());
         }
       );
     }
   });
   context.subscriptions.push(openCmd);
+
+  // Re-apply settings (e.g. showCostInStatusBar, disableRefreshAnimation) as
+  // soon as the user changes them, instead of waiting for the next data poll.
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+    if (!e.affectsConfiguration('clusage') || !lastSummary) return;
+    statusBar?.update(lastSummary, lastQuota);
+    refreshDashboard(lastSummary, lastQuota, noAnimEnabled());
+  }));
 
   // Watch for new JSONL data
   const claudeGlob = new vscode.RelativePattern(

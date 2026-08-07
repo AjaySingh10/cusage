@@ -195,15 +195,10 @@ Costs are computed locally using these published rates:
 | Model | Input | Output | Cache Write (5m) | Cache Read |
 |---|---|---|---|---|
 | Claude Fable 5 | $10.00 / MTok | $50.00 / MTok | $12.50 / MTok | $1.00 / MTok |
-| Claude Opus 4.8 | $5.00 / MTok | $25.00 / MTok | $6.25 / MTok | $0.50 / MTok |
-| Claude Opus 4.5 / 4.6 / 4.7 | $5.00 / MTok | $25.00 / MTok | $6.25 / MTok | $0.50 / MTok |
-| Claude Opus 4 / 4.1 (deprecated) | $15.00 / MTok | $75.00 / MTok | $18.75 / MTok | $1.50 / MTok |
-| Claude Sonnet 4 / 4.5 / 4.6 | $3.00 / MTok | $15.00 / MTok | $3.75 / MTok | $0.30 / MTok |
+| Claude Opus 5 | $5.00 / MTok | $25.00 / MTok | $6.25 / MTok | $0.50 / MTok |
+| Claude Sonnet 5 (intro, through 2026-08-31) | $2.00 / MTok | $10.00 / MTok | $2.50 / MTok | $0.20 / MTok |
+| Claude Sonnet 5 (list, from 2026-09-01) | $3.00 / MTok | $15.00 / MTok | $3.75 / MTok | $0.30 / MTok |
 | Claude Haiku 4.5 | $1.00 / MTok | $5.00 / MTok | $1.25 / MTok | $0.10 / MTok |
-| Claude Haiku 3.5 (retired) | $0.80 / MTok | $4.00 / MTok | $1.00 / MTok | $0.08 / MTok |
-| Claude 3 Opus | $15.00 / MTok | $75.00 / MTok | $18.75 / MTok | $1.50 / MTok |
-| Claude 3.5 Sonnet | $3.00 / MTok | $15.00 / MTok | $3.75 / MTok | $0.30 / MTok |
-| Claude 3 Haiku | $0.25 / MTok | $1.25 / MTok | $0.31 / MTok | $0.025 / MTok |
 
 > **Note:** Prices are approximate estimates based on published rates and may not reflect your exact invoice. Always refer to [anthropic.com/pricing](https://www.anthropic.com/pricing) for the latest figures.
 

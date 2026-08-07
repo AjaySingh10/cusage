@@ -33,7 +33,8 @@ export class StatusBarController {
       return;
     }
 
-    const cost = formatCost(summary.todayCost);
+    const showCost = vscode.workspace.getConfiguration('clusage').get<boolean>('showCostInStatusBar', true);
+    const costPart = showCost ? `${formatCost(summary.todayCost)}  ` : '';
 
     const fmtPct = (v: number) =>
       v > 1      ? 'maxed' :
@@ -46,16 +47,16 @@ export class StatusBarController {
 
     if (quota) {
       const reset = timeUntil(quota.fiveHourResetAt);
-      this.item.text = `$(graph) ${cost}  5h:${fmtPct(quota.fiveHourUtilization)} $(clock)${reset}  7d:${fmtPct(quota.sevenDayUtilization)}`;
+      this.item.text = `$(graph) ${costPart}5h:${fmtPct(quota.fiveHourUtilization)} $(clock)${reset}  7d:${fmtPct(quota.sevenDayUtilization)}`;
     } else {
       // Quota fetch failed (no creds, offline, transient API error) but we
       // still have real usage data — show cost-only instead of stalling on
       // the spinner forever.
       this.item.color = undefined;
-      this.item.text  = `$(graph) ${cost}`;
+      this.item.text  = showCost ? `$(graph) ${formatCost(summary.todayCost)}` : '$(graph) Claude Usage';
     }
 
-    this.item.tooltip = buildTooltip(summary, quota);
+    this.item.tooltip = buildTooltip(summary, quota, showCost);
   }
 
   dispose(): void {
@@ -63,26 +64,19 @@ export class StatusBarController {
   }
 }
 
-function buildTooltip(summary: UsageSummary, quota: QuotaData | null): vscode.MarkdownString {
-  const fmtDelta = (current: number, ref: number): string => {
-    if (ref === 0) return '-';
-    const pct = ((current - ref) / ref) * 100;
-    return `${pct >= 0 ? '+' : ''}${pct.toFixed(0)}%`;
-  };
-
+function buildTooltip(summary: UsageSummary, quota: QuotaData | null, showCost: boolean): vscode.MarkdownString {
   const fmtPct = (v: number) =>
     v > 1     ? '**Maxed**' :
     v < 0.001 ? '0%' :
     v < 0.1   ? `${(v * 100).toFixed(1)}%` :
                 `${Math.round(v * 100)}%`;
 
-  const lines: string[] = [
-    `**Today's Usage (API Cost)**`,
-    ``,
-    `💰 Cost: **${formatCost(summary.todayCost)}**`,
+  const lines: string[] = [`**Today's Usage**`, ``];
+  if (showCost) lines.push(`💰 Cost: **${formatCost(summary.todayCost)}**`);
+  lines.push(
     `🔢 Tokens: ${formatTokenCount(summary.todayTokens)}`,
     `💬 Messages: ${summary.todayMessages}`,
-  ];
+  );
 
   if (quota) {
     lines.push(
@@ -98,12 +92,13 @@ function buildTooltip(summary: UsageSummary, quota: QuotaData | null): vscode.Ma
     ``,
     `---`,
     `🔥 Streak: ${summary.streakDays} day${summary.streakDays !== 1 ? 's' : ''}`,
-    ``,
-    `---`,
-    `All Time: **${formatCost(summary.allTimeCost)}**`,
-    ``,
-    `*Click to open dashboard*`,
   );
+
+  if (showCost) {
+    lines.push(``, `---`, `All Time: **${formatCost(summary.allTimeCost)}**`);
+  }
+
+  lines.push(``, `*Click to open dashboard*`);
 
   const md = new vscode.MarkdownString(lines.join('\n\n'));
   md.isTrusted = true;

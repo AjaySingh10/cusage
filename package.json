@@ -2,7 +2,7 @@
   "name": "clusage",
   "displayName": "Clusage - Claude Usage Tracker",
   "description": "Real-time Claude Code usage tracking - cost, tokens, and live quota in your status bar and a beautiful dashboard.",
-  "version": "5.0.1",
+  "version": "5.1.0",
   "publisher": "Ajax1029",
   "author": {
     "name": "Ajax1029"
@@ -54,7 +54,22 @@
         "title": "Claude Usage: Open Dashboard",
         "icon": "$(graph)"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Clusage",
+      "properties": {
+        "clusage.showCostInStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the cost (in USD) in the status bar. Turn this off if you're on a fixed-price Claude plan and only care about quota usage."
+        },
+        "clusage.disableRefreshAnimation": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable the dashboard's fade-in animations so background refreshes only update the numbers instead of redrawing the display."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
